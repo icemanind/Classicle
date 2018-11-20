@@ -1,0 +1,146 @@
+﻿<Window x:Class="Classicle.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Classicle"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800" Background="#FF283246" BorderBrush="MintCream" BorderThickness="2" Closing="Window_Closing">
+    <Window.Resources>
+        <local:InverseBooleanConverter x:Key="Inverter"></local:InverseBooleanConverter>
+        <local:DisabledEnabledColorConverter x:Key="DisabledEnabledColor"></local:DisabledEnabledColorConverter>
+    </Window.Resources>
+    <Grid Margin="5">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="350px" />
+            <ColumnDefinition Width="1*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="45px" />
+            <RowDefinition Height="1*" />
+            <RowDefinition Height="40px" />
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" HorizontalAlignment="Center" FontSize="36" Foreground="#FFE6E6FC" FontStyle="Italic" FontWeight="Bold" FontFamily="Arial" Text="Classicle 1.0" VerticalAlignment="Top">
+            <TextBlock.Effect>
+                <DropShadowEffect Direction="330" ShadowDepth="4" Opacity="0.5" Color="#FFDCDCFF"></DropShadowEffect>
+            </TextBlock.Effect>
+        </TextBlock>
+        <GroupBox Header="SQL Options" Grid.Row="1" Grid.Column="0" Foreground="#FFE6E6FC">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="120px"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="25px" />
+                    <RowDefinition Height="25px" />
+                    <RowDefinition Height="30px" />
+                    <RowDefinition Height="30px" />
+                    <RowDefinition Height="30px" />
+                    <RowDefinition Height="30px" />
+                    <RowDefinition Height="30px" />
+                    <RowDefinition Height="30px" />
+                </Grid.RowDefinitions>
+                <TextBlock Text="Server Type:" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" Margin="0,0,5,0"/>
+                <ComboBox x:Name="ServerTypeComboBox" Grid.Row="0" Grid.Column="1" VerticalAlignment="Top" Margin="0,0,5,0">
+                    <ComboBoxItem x:Name="SqlServerServerTypeItem" IsSelected="True">SQL Server</ComboBoxItem>
+                    <ComboBoxItem x:Name="MySqlServerTypeItem" Tag="2">MySQL</ComboBoxItem>
+                </ComboBox>
+                <ContentControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" x:Name="SqlServerContent" IsTabStop="False" Grid.RowSpan="7">
+                    <ContentControl.Style>
+                        <Style TargetType="ContentControl">
+                            <Setter Property="Visibility" Value="Hidden"></Setter>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=SqlServerServerTypeItem, Path=IsSelected}" Value="True">
+                                    <Setter Property="ContentControl.Visibility" Value="Visible"></Setter>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ContentControl.Style>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="120px"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="25px" />
+                            <RowDefinition Height="30px" />
+                            <RowDefinition Height="30px" />
+                            <RowDefinition Height="30px" />
+                            <RowDefinition Height="30px" />
+                            <RowDefinition Height="30px" />
+                            <RowDefinition Height="30px" />
+                            <RowDefinition Height="30px" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="Server Name:" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" Margin="0,0,5,0" VerticalAlignment="Center"></TextBlock>
+                        <TextBox Grid.Row="0" Grid.Column="1" Margin="0,0,5,0" x:Name="SqlServerServerName"/>
+
+                        <TextBlock Text="Server Port:" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" Margin="0,0,5,0" VerticalAlignment="Center"></TextBlock>
+                        <TextBox Grid.Row="1" Grid.Column="1" Margin="0,5,5,0" x:Name="SqlServerServerPort" PreviewTextInput="SqlServerServerPort_PreviewTextInput" DataObject.Pasting="SqlServerServerPort_Pasting"/>
+
+                        <TextBlock Text="Database Name:" Grid.Row="2" Grid.Column="0" HorizontalAlignment="Right" Margin="0,0,5,0" VerticalAlignment="Center"></TextBlock>
+                        <TextBox Grid.Row="2" Grid.Column="1" Margin="0,5,5,0" x:Name="SqlServerDatabaseName" LostFocus="SqlServerDatabaseName_LostFocus"/>
+
+                        <TextBlock Text="Default Schema:" Grid.Row="3" Grid.Column="0" HorizontalAlignment="Right" Margin="0,0,5,0" VerticalAlignment="Center"></TextBlock>
+                        <TextBox Grid.Row="3" Grid.Column="1" Margin="0,5,5,0" x:Name="SqlServerDefaultSchema"/>
+
+                        <TextBlock Text="Trusted Connection:" Grid.Row="4" Grid.Column="0" HorizontalAlignment="Right" Margin="0,0,5,0" VerticalAlignment="Center"></TextBlock>
+                        <CheckBox Grid.Row="4" Grid.Column="1" Margin="0,0,5,0" VerticalAlignment="Center" x:Name="SqlServerTrustedConnection" />
+
+                        <TextBlock Text="User Name:" Grid.Row="5" Grid.Column="0" HorizontalAlignment="Right" Margin="0,0,5,0" VerticalAlignment="Center" Foreground="{Binding Path=IsChecked, ElementName=SqlServerTrustedConnection, Converter={StaticResource DisabledEnabledColor}}"></TextBlock>
+                        <TextBox Grid.Row="5" Grid.Column="1" Margin="0,5,5,0" x:Name="SqlServerUsername" IsEnabled="{Binding Path=IsChecked, ElementName=SqlServerTrustedConnection, Converter={StaticResource Inverter}}"/>
+
+                        <TextBlock Text="Password:" Grid.Row="6" Grid.Column="0" HorizontalAlignment="Right" Margin="0,0,5,0" VerticalAlignment="Center" Foreground="{Binding Path=IsChecked, ElementName=SqlServerTrustedConnection, Converter={StaticResource DisabledEnabledColor}}"></TextBlock>
+                        <PasswordBox Grid.Row="6" Grid.Column="1" Margin="0,5,5,0" x:Name="SqlServerPassword" IsEnabled="{Binding Path=IsChecked, ElementName=SqlServerTrustedConnection, Converter={StaticResource Inverter}}" />
+                    </Grid>
+                </ContentControl>
+            </Grid>
+        </GroupBox>
+        <GroupBox Grid.Column="1" Grid.Row="1" Foreground="#FFE6E6FC" Header="Language Options">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="180px"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="25px" />
+                    <RowDefinition Height="25px" />
+                    <RowDefinition Height="30px" />
+                    <RowDefinition Height="20px" />
+                    <RowDefinition Height="20px" />
+                    <RowDefinition Height="30px" />
+                    <RowDefinition Height="30px" />
+                    <RowDefinition Height="30px" />
+                </Grid.RowDefinitions>
+                <TextBlock Text="Output:" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" Margin="0,0,5,0" VerticalAlignment="Center"></TextBlock>
+                <Grid Grid.Row="0" Grid.Column="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="25px" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="25px" />
+                    </Grid.RowDefinitions>
+                    <TextBox Margin="0,0,5,0" x:Name="OutputPath" Grid.Column="0" Grid.Row="0"/>
+                    <Button Margin="0,0,5,0" x:Name="OutputBrowse" Grid.Column="1" Grid.Row="0" Click="OutputBrowse_Click">...</Button>
+                </Grid>
+
+                <TextBlock Text="Language:" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" Margin="0,0,5,0" VerticalAlignment="Center"></TextBlock>
+                <ComboBox x:Name="LanguageComboBox" Grid.Row="1" Grid.Column="1" VerticalAlignment="Top" Margin="0,5,5,0" SelectionChanged="LanguageComboBox_SelectionChanged">
+                    <ComboBoxItem x:Name="CSharpLanguageItem" Tag="C#">C#</ComboBoxItem>
+                    <ComboBoxItem x:Name="VbLanguageItem" Tag="VB.Net">VB.Net</ComboBoxItem>
+                </ComboBox>
+
+                <TextBlock Text="Namespace:" Grid.Row="2" Grid.Column="0" HorizontalAlignment="Right" Margin="0,0,5,0" VerticalAlignment="Center"></TextBlock>
+                <TextBox Grid.Row="2" Grid.Column="1" Margin="0,5,5,0" x:Name="NamespaceName"/>
+
+                <TextBlock Text="Use Dapper.Contrib.Extensions:" Grid.Row="3" Grid.Column="0" HorizontalAlignment="Right" Margin="0,0,5,0" VerticalAlignment="Center"></TextBlock>
+                <CheckBox Grid.Row="3" Grid.Column="1" VerticalAlignment="Center" x:Name="UseDapperExtensionsCheckBox"></CheckBox>
+
+                <TextBlock Text="Use Backing Fields for Properties:" Grid.Row="4" Grid.Column="0" HorizontalAlignment="Right" Margin="0,0,5,0" VerticalAlignment="Center"></TextBlock>
+                <CheckBox Grid.Row="4" Grid.Column="1" VerticalAlignment="Center" x:Name="UseBackingFieldsCheckBox"></CheckBox>
+            </Grid>
+        </GroupBox>
+        <Button x:Name="CreateClasses" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,5,0,0" Padding="5px" Click="CreateClasses_Click">Create Classes...</Button>
+    </Grid>
+</Window>
