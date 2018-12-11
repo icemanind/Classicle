@@ -45,7 +45,90 @@
                 <ComboBox x:Name="ServerTypeComboBox" Grid.Row="0" Grid.Column="1" VerticalAlignment="Top" Margin="0,0,5,0">
                     <ComboBoxItem x:Name="SqlServerServerTypeItem" IsSelected="True">SQL Server</ComboBoxItem>
                     <ComboBoxItem x:Name="MySqlServerTypeItem" Tag="2">MySQL</ComboBoxItem>
+                    <ComboBoxItem x:Name="SqliteServerTypeItem" Tag="3">Sqlite</ComboBoxItem>
                 </ComboBox>
+                <ContentControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" x:Name="MySqlContent" IsTabStop="False" Grid.RowSpan="7">
+                    <ContentControl.Style>
+                        <Style TargetType="ContentControl">
+                            <Setter Property="Visibility" Value="Hidden"></Setter>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=MySqlServerTypeItem, Path=IsSelected}" Value="True">
+                                    <Setter Property="ContentControl.Visibility" Value="Visible"></Setter>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ContentControl.Style>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="120px"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="25px" />
+                            <RowDefinition Height="30px" />
+                            <RowDefinition Height="30px" />
+                            <RowDefinition Height="30px" />
+                            <RowDefinition Height="30px" />
+                            <RowDefinition Height="30px" />
+                            <RowDefinition Height="30px" />
+                            <RowDefinition Height="30px" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="Server Name:" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" Margin="0,0,5,0" VerticalAlignment="Center"></TextBlock>
+                        <TextBox Grid.Row="0" Grid.Column="1" Margin="0,0,5,0" x:Name="MySqlServerName"/>
+
+                        <TextBlock Text="Server Port:" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" Margin="0,0,5,0" VerticalAlignment="Center"></TextBlock>
+                        <TextBox Grid.Row="1" Grid.Column="1" Margin="0,5,5,0" x:Name="MySqlServerPort" PreviewTextInput="SqlServerServerPort_PreviewTextInput" DataObject.Pasting="SqlServerServerPort_Pasting"/>
+
+                        <TextBlock Text="Database Name:" Grid.Row="2" Grid.Column="0" HorizontalAlignment="Right" Margin="0,0,5,0" VerticalAlignment="Center"></TextBlock>
+                        <TextBox Grid.Row="2" Grid.Column="1" Margin="0,5,5,0" x:Name="MySqlDatabaseName" LostFocus="SqlServerDatabaseName_LostFocus"/>
+
+                        <TextBlock Text="User Name:" Grid.Row="3" Grid.Column="0" HorizontalAlignment="Right" Margin="0,0,5,0" VerticalAlignment="Center"></TextBlock>
+                        <TextBox Grid.Row="3" Grid.Column="1" Margin="0,5,5,0" x:Name="MySqlUsername"/>
+
+                        <TextBlock Text="Password:" Grid.Row="4" Grid.Column="0" HorizontalAlignment="Right" Margin="0,0,5,0" VerticalAlignment="Center"></TextBlock>
+                        <PasswordBox Grid.Row="4" Grid.Column="1" Margin="0,5,5,0" x:Name="MySqlPassword" />
+                    </Grid>
+                </ContentControl>
+                <ContentControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" x:Name="SqliteContent" IsTabStop="False" Grid.RowSpan="7">
+                    <ContentControl.Style>
+                        <Style TargetType="ContentControl">
+                            <Setter Property="Visibility" Value="Hidden"></Setter>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=SqliteServerTypeItem, Path=IsSelected}" Value="True">
+                                    <Setter Property="ContentControl.Visibility" Value="Visible"></Setter>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ContentControl.Style>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="120px"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="25px" />
+                            <RowDefinition Height="30px" />
+                            <RowDefinition Height="30px" />
+                            <RowDefinition Height="30px" />
+                            <RowDefinition Height="30px" />
+                            <RowDefinition Height="30px" />
+                            <RowDefinition Height="30px" />
+                            <RowDefinition Height="30px" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="File Name:" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" Margin="0,0,5,0" VerticalAlignment="Center"></TextBlock>
+                        <Grid Grid.Row="0" Grid.Column="1" Margin="0,0,5,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"></ColumnDefinition>
+                                <ColumnDefinition Width="25px"></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="SqliteFileName" Grid.Column="0" Grid.Row="0"/>
+                            <Button x:Name="SqliteFileNameBrowse" Grid.Column="1" Grid.Row="0" Click="SqliteFileNameBrowse_Click">...</Button>
+                        </Grid>
+
+                        <TextBlock Text="Password:" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" Margin="0,0,5,0" VerticalAlignment="Center"></TextBlock>
+                        <PasswordBox  Grid.Row="1" Grid.Column="1" Margin="0,5,5,0" x:Name="SqlitePassword" />
+                    </Grid>
+                </ContentControl>
                 <ContentControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" x:Name="SqlServerContent" IsTabStop="False" Grid.RowSpan="7">
                     <ContentControl.Style>
                         <Style TargetType="ContentControl">
@@ -96,7 +179,7 @@
                 </ContentControl>
             </Grid>
         </GroupBox>
-        <GroupBox Grid.Column="1" Grid.Row="1" Foreground="#FFE6E6FC" Header="Language Options">
+        <GroupBox Grid.Column="1" Grid.Row="1" Foreground="#FFE6E6FC" Header="Language Options" Margin="5,0,0,0">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="180px"/>

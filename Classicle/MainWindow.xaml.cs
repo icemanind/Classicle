@@ -79,6 +79,23 @@ namespace Classicle
             }
         }
 
+        private void SqliteFileNameBrowse_Click(object sender, RoutedEventArgs e)
+        {
+            var f = new OpenFileDialog
+            {
+                ShowReadOnly = false,
+                ShowHelp = false,
+                SupportMultiDottedExtensions = false,
+                Title = @"Open SQLite Database"
+            };
+            IWin32Window win32Window = new NativeWindow();
+            ((NativeWindow)win32Window).AssignHandle(new WindowInteropHelper(this).Handle);
+
+            DialogResult dr = f.ShowDialog(win32Window);
+            if (dr == System.Windows.Forms.DialogResult.Cancel) return;
+            SqliteFileName.Text = f.FileName;
+        }
+
         private void OutputBrowse_Click(object sender, RoutedEventArgs e)
         {
             var f = new FolderBrowserDialog { Description = @"Select a folder for Classicle to place output files" };
@@ -114,6 +131,27 @@ namespace Classicle
                     database.Username = settings.SqlServerUsername;
                     database.Password = settings.SqlServerPassword;
                 }
+            }
+
+            if (name == "Sqlite")
+            {
+                database = new Implementations.Database.Sqlite
+                {
+                    DatabaseName = settings.SqliteFileName,
+                    Password = settings.SqlitePassword
+                };
+            }
+
+            if (name == "MySQL")
+            {
+                database = new Implementations.Database.MySql
+                {
+                    DatabaseName = settings.MySqlDatabaseName,
+                    ServerName = settings.MySqlServerName,
+                    ServerPort = settings.MySqlServerPort,
+                    Username = settings.MySqlUsername,
+                    Password = settings.MySqlPassword
+                };
             }
 
             database.Language = settings.Language;
@@ -165,13 +203,22 @@ namespace Classicle
             NamespaceName.Text = settings.Namespace;
             UseDapperExtensionsCheckBox.IsChecked = settings.UseDapperExtensions;
             UseBackingFieldsCheckBox.IsChecked = settings.UseBackingFields;
+
+            SqliteFileName.Text = settings.SqliteFileName;
+            SqlitePassword.Password = settings.SqlitePassword;
+
+            MySqlServerName.Text = settings.MySqlServerName;
+            MySqlServerPort.Text = settings.MySqlServerPort.ToString();
+            MySqlUsername.Text = settings.MySqlUsername;
+            MySqlPassword.Password = settings.MySqlPassword;
+            MySqlDatabaseName.Text = settings.MySqlDatabaseName;
         }
 
         private Settings GetFormValues()
         {
             var settings = new Settings
             {
-                ServerType = (Settings.ServerTypes)(ServerTypeComboBox.SelectedIndex + 1),
+                ServerType = (Settings.ServerTypes) (ServerTypeComboBox.SelectedIndex + 1),
                 SqlServerServerName = SqlServerServerName.Text,
                 SqlServerServerPort = int.Parse(SqlServerServerPort.Text),
                 SqlServerDatabaseName = SqlServerDatabaseName.Text,
@@ -180,10 +227,17 @@ namespace Classicle
                 SqlServerUsername = SqlServerUsername.Text,
                 SqlServerPassword = SqlServerPassword.Password,
                 OutputFolder = OutputPath.Text,
-                Language = (Settings.Languages)(LanguageComboBox.SelectedIndex + 1),
+                Language = (Settings.Languages) (LanguageComboBox.SelectedIndex + 1),
                 Namespace = NamespaceName.Text,
                 UseDapperExtensions = UseDapperExtensionsCheckBox.IsChecked ?? true,
-                UseBackingFields = UseBackingFieldsCheckBox.IsChecked ?? false
+                UseBackingFields = UseBackingFieldsCheckBox.IsChecked ?? false,
+                SqliteFileName = SqliteFileName.Text,
+                SqlitePassword = SqlitePassword.Password,
+                MySqlServerName = MySqlServerName.Text,
+                MySqlDatabaseName = MySqlDatabaseName.Text,
+                MySqlUsername = MySqlUsername.Text,
+                MySqlPassword = MySqlPassword.Password,
+                MySqlServerPort = int.Parse(MySqlServerPort.Text)
             };
 
             return settings;

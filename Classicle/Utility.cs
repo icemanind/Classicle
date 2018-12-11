@@ -235,5 +235,10 @@ namespace Classicle
             if (name.Length == 1) return char.ToLowerInvariant(name[0]) + "";
             return char.ToLowerInvariant(GetPascalCaseName(name)[0]) + GetPascalCaseName(name).Substring(1);
         }
+
+        internal static string GetIndentSpaces(int indentLength)
+        {
+            return new string(' ', indentLength);
+        }
     }
 }

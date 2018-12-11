@@ -21,5 +21,6 @@
         public bool CanBeNull { get; set; }
         public bool IsValueType { get; set; }
         public string DefaultValue { get; set; }
+        public bool IsUnsigned { get; set; }
     }
 }

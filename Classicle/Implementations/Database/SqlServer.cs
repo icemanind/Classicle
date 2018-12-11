@@ -5,7 +5,6 @@ using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Classicle.Implementations.Database
 {
@@ -526,57 +525,53 @@ namespace Classicle.Implementations.Database
 
         public void CreateLayers(List<ObjectViewModel> objects, string outputFolder)
         {
-            CreateClassicleFile(outputFolder);
+            ILanguage language = null;
+
+            switch (Language)
+            {
+                case Classicle.Settings.Languages.CSharp:
+                    language = new Language.CSharp();
+                    break;
+                case Classicle.Settings.Languages.VbNet:
+                    language = new Language.VbNet();
+                    break;
+                default:
+                    language = new Language.CSharp();
+                    break;
+            }
+
+            string classicleFile = Path.Combine(outputFolder, $"Classicle{language.FileNameExtension}");
+            File.WriteAllText(classicleFile, language.GetClassicalFile(DefaultNamespace, ConnectionString));
+
             foreach (ObjectViewModel obj in objects)
             {
                 string fileName = Utility.GetCsPropertyName(obj.ObjectName);
-                string file = Path.Combine(outputFolder, fileName) + (Language == Classicle.Settings.Languages.CSharp ? ".cs" : Language == Classicle.Settings.Languages.VbNet ? ".vb" : "");
+                string file = Path.Combine(outputFolder, fileName) + language.FileNameExtension;
                 var sb = new StringBuilder();
 
                 List<Field> fields = MapFields(obj.ObjectName);
 
-                if (Language == Classicle.Settings.Languages.CSharp)
+                sb.AppendLine(language.GetImportsCode(UseDapperExtensions));
+                sb.AppendLine();
+                sb.AppendLine(language.GetNamespaceCode(DefaultNamespace));
+                sb.AppendLine(language.GetOpeningNamespaceMarker());
+                if (UseDapperExtensions)
                 {
-                    if (UseDapperExtensions)
-                    {
-                        sb.AppendLine("using Dapper.Contrib.Extensions;");
-                        sb.AppendLine();
-                    }
-
-                    sb.AppendLine($"namespace {Utility.GetCsPropertyName(DefaultNamespace)}");
-                    sb.AppendLine("{");
-                    sb.AppendLine($"    public class {Utility.GetCsPropertyName(obj.ObjectName)}");
-                    sb.AppendLine("     {");
+                    sb.AppendLine($"{Utility.GetIndentSpaces(4)}{language.GetAttributeOpeningMarker()}Table(\"{obj.ObjectName}\"){language.GetAttributeClosingMarker()}");
                 }
-                else if (Language == Classicle.Settings.Languages.VbNet)
-                {
-                    if (UseDapperExtensions)
-                    {
-                        sb.AppendLine("Imports Dapper.Contrib.Extensions");
-                        sb.AppendLine();
-                    }
-
-                    sb.AppendLine($"Namespace {Utility.GetVbPropertyName(DefaultNamespace)}");
-                    sb.AppendLine($"    Public Class {Utility.GetVbPropertyName(obj.ObjectName)}");
-                }
+                sb.AppendLine(Utility.GetIndentSpaces(4) + language.GetPublicClassCode(obj.ObjectName));
+                sb.AppendLine(Utility.GetIndentSpaces(4) + language.GetOpeningClassMarker());
 
                 if (UseBackingFields)
                 {
                     foreach (Field field in fields)
                     {
-                        string nullable = "";
-
-                        if (field.CanBeNull && field.CsDataType != "string") nullable = "?";
-
-                        if (Language == Classicle.Settings.Languages.CSharp)
+                        if (!string.IsNullOrWhiteSpace(field.Description))
                         {
-                            if (!string.IsNullOrWhiteSpace(field.Description)) sb.AppendLine($"        // {field.SafeCsFieldName} - {field.Description}");
-                            sb.AppendLine($"        private {field.CsDataType}{nullable} {field.SafeCsFieldName};");
-                        } else if (Language == Classicle.Settings.Languages.VbNet)
-                        {
-                            if (!string.IsNullOrWhiteSpace(field.Description)) sb.AppendLine($"        ' {field.SafeVbFieldName} - {field.Description}");
-                            sb.AppendLine($"        Private {field.SafeVbFieldName} As {field.VbDataType}{nullable}");
+                            sb.AppendLine($"{Utility.GetIndentSpaces(8)}{language.GetSingleLineCommentMarker()} { language.GetSafeFieldName(field) } - {field.Description}");
                         }
+
+                        sb.AppendLine($"{Utility.GetIndentSpaces(8)}{language.GetPrivateBackingFieldCode(field)}");
                     }
 
                     sb.AppendLine();
@@ -584,117 +579,33 @@ namespace Classicle.Implementations.Database
 
                 foreach (Field field in fields)
                 {
-                    string nullable = "";
-
-                    if (field.CanBeNull && field.CsDataType != "string") nullable = "?";
-
-                    if (Language == Classicle.Settings.Languages.CSharp)
+                    if (!string.IsNullOrWhiteSpace(field.Description))
                     {
-                        if (!string.IsNullOrWhiteSpace(field.Description)) sb.AppendLine($"        // {field.SafeCsPropertyName} - {field.Description}");
-                        if (field.IsPrimaryKey && field.IsIdentity && UseDapperExtensions)
-                        {
-                            sb.AppendLine("        [Key]");
-                        } else if (field.IsPrimaryKey && UseDapperExtensions)
-                        {
-                            sb.AppendLine("        [ExplicitKey]");
-                        }
-
-                        if (field.IsComputedField && UseDapperExtensions)
-                        {
-                            sb.AppendLine("        [Computed]");
-                            sb.AppendLine("        [Write(false)]");
-                        }
-
-                        if (!UseBackingFields)
-                        {
-                            sb.AppendLine($"        public {field.CsDataType}{nullable} {field.SafeCsPropertyName} {{ get; set; }}");
-                        }
-                        else
-                        {
-                            sb.AppendLine($"        public {field.CsDataType}{nullable} {field.SafeCsPropertyName}");
-                            sb.AppendLine("        {");
-                            sb.AppendLine($"            get {{ return {field.SafeCsFieldName}; }}");
-                            sb.AppendLine($"            set {{ {field.SafeCsFieldName} = value; }}");
-                            sb.AppendLine("        }");
-                        }
+                        sb.AppendLine($"{Utility.GetIndentSpaces(8)}{language.GetSingleLineCommentMarker()} { language.GetSafePropertyName(field) } - {field.Description}");
                     }
-                    else if (Language == Classicle.Settings.Languages.VbNet)
+
+                    if (field.IsPrimaryKey && field.IsIdentity && UseDapperExtensions)
                     {
-                        if (!string.IsNullOrWhiteSpace(field.Description)) sb.AppendLine($"        ' {field.SafeVbPropertyName} - {field.Description}");
-                        if (field.IsPrimaryKey && field.IsIdentity && UseDapperExtensions)
-                        {
-                            sb.AppendLine("        <Key>");
-                        }
-                        else if (field.IsPrimaryKey && UseDapperExtensions)
-                        {
-                            sb.AppendLine("        <ExplicitKey>");
-                        }
-
-                        if (field.IsComputedField && UseDapperExtensions)
-                        {
-                            sb.AppendLine("        <Computed>");
-                            sb.AppendLine("        <Write(false)>");
-                        }
-
-                        sb.AppendLine($"        Public Property {field.SafeVbPropertyName} As {field.VbDataType}{nullable}");
-
-                        if (UseBackingFields)
-                        {
-                            sb.AppendLine("            Get");
-                            sb.AppendLine($"                Return {field.SafeVbFieldName}");
-                            sb.AppendLine("            End Get");
-                            sb.AppendLine($"            Set(ByVal value As {field.VbDataType}{nullable})");
-                            sb.AppendLine($"                {field.SafeVbFieldName} = value");
-                            sb.AppendLine("            End Set");
-                            sb.AppendLine("        End Property");
-                        }
+                        sb.AppendLine($"{Utility.GetIndentSpaces(8)}{language.GetAttributeOpeningMarker()}Key{language.GetAttributeClosingMarker()}");
+                    } else if (field.IsPrimaryKey && UseDapperExtensions)
+                    {
+                        sb.AppendLine($"{Utility.GetIndentSpaces(8)}{language.GetAttributeOpeningMarker()}ExplicitKey{language.GetAttributeClosingMarker()}");
                     }
+
+                    if (field.IsComputedField && UseDapperExtensions)
+                    {
+                        sb.AppendLine($"{Utility.GetIndentSpaces(8)}{language.GetAttributeOpeningMarker()}Computed{language.GetAttributeClosingMarker()}");
+                        sb.AppendLine($"{Utility.GetIndentSpaces(8)}{language.GetAttributeOpeningMarker()}Write(false){language.GetAttributeClosingMarker()}");
+                    }
+
+                    sb.AppendLine(language.GetPublicPropertyCode(field, UseBackingFields, 8));
                 }
 
-                if (Language == Classicle.Settings.Languages.CSharp)
-                {
-                    sb.AppendLine("    }");
-                    sb.AppendLine("}");
-                }
-                else if (Language == Classicle.Settings.Languages.VbNet)
-                {
-                    sb.AppendLine("    End Class");
-                    sb.AppendLine("End Namespace");
-                }
+                sb.AppendLine($"{Utility.GetIndentSpaces(4)}{language.GetClosingClassMarker()}");
+                sb.AppendLine($"{language.GetClosingNamespaceMarker()}");
 
                 File.WriteAllText(file, sb.ToString());
             }
-        }
-
-        private void CreateClassicleFile(string outputFolder)
-        {
-            string file = Path.Combine(outputFolder, "Classicle") + (Language == Classicle.Settings.Languages.CSharp ? ".cs" : Language == Classicle.Settings.Languages.VbNet ? ".vb" : "");
-            var sb = new StringBuilder();
-
-            if (Language == Classicle.Settings.Languages.CSharp)
-            {
-                sb.AppendLine($"namespace {Utility.GetCsPropertyName(DefaultNamespace)}");
-                sb.AppendLine("{");
-                sb.AppendLine("    public static class Classicle");
-                sb.AppendLine("    {");
-                sb.AppendLine("        public static string GetConnectionString()");
-                sb.AppendLine("        {");
-                sb.AppendLine("            return \"" + ConnectionString.Replace("\"", "\\\"") + "\";");
-                sb.AppendLine("        }");
-                sb.AppendLine("    }");
-                sb.AppendLine("}");
-            } else if (Language == Classicle.Settings.Languages.VbNet)
-            {
-                sb.AppendLine($"Namespace {Utility.GetVbPropertyName(DefaultNamespace)}");
-                sb.AppendLine("    Public Module Classicle");
-                sb.AppendLine("        Function GetConnectionString() As String");
-                sb.AppendLine("            Return \"" + ConnectionString.Replace("\"", "\"\"") + "\"");
-                sb.AppendLine("        End Function");
-                sb.AppendLine("    End Module");
-                sb.AppendLine("End Namespace");
-            }
-
-            File.WriteAllText(file, sb.ToString());
         }
     }
 }

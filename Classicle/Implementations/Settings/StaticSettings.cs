@@ -9,7 +9,7 @@
             {
                 Language = Classicle.Settings.Languages.CSharp,
                 OutputFolder = @"C:\q\Classicle",
-                ServerType = Classicle.Settings.ServerTypes.SqlServer,
+                ServerType = Classicle.Settings.ServerTypes.MySql,
                 SqlServerServerName = "132.148.80.197",
                 SqlServerServerPort = 1433,
                 SqlServerDatabaseName = "OnQ",
@@ -19,7 +19,14 @@
                 SqlServerPassword = "sLa#zip7",
                 Namespace = "OnQ",
                 UseDapperExtensions = true,
-                UseBackingFields = false
+                UseBackingFields = false,
+                SqliteFileName = @"C:\q\test.db3",
+                SqlitePassword = "",
+                MySqlServerName = "192.168.253.131",
+                MySqlServerPort = 3306,
+                MySqlUsername = "alan",
+                MySqlPassword = "sLa#zip7",
+                MySqlDatabaseName = "test"
             };
 
             return settings;
